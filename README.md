@@ -1,32 +1,55 @@
-<br/>
-<p align="center">
-    <img src="https://logowik.com/content/uploads/images/flutter5786.jpg" width="10%" />
-</p>
+# **Introducing Dart 3**
 
-### 1.What is flutter?
+![](https://miro.medium.com/v2/resize:fit:720/format:webp/1*2XwxNKHrKb3SGaWEyqg2nA.png)
 
-> [Flutter](https://flutter.dev/) is an **open source** framework by Google for building beautiful, natively compiled, multi-platform applications from a **single** codebase.
+# What's new in Dart 3?  
+Dart 3 is a new major release. Partly to signify the large step forward in new functionality, and partly because it’s a breaking release in terms of semantic versioning: We’re changing the type system to only support **sound null safety** (in Dart 2.12 and later this was opt-in), and have made the corresponding breaking changes in Dart’s core libraries. Let’s dive into the details!
 
-> [Flutter](https://flutter.dev/) is supported and used by **Google**, trusted by well-known brands around the world, and maintained by a community of global developers.
+## Dart 3 productivity enhancements  
+- In Dart 3 we expect to add two new major features, records and patterns, with the goal of making working with structured data more productive.
 
- #### Flutter command-line code
- 
- - Create flutter prject with 
- ```shell 
- $ flutter create project_name
+- Records allow you to efficiently and concisely create anonymous composite values from any existing data, without the conceptual overhead of needing to declare a class to hold the values. With records, you can easily build new data structures that combine existing data. For example, to return a pair of values:
+
+ ``` dart
+ (double x, double y) geoLocation() {
+    return (-1.2921, 36.8219);
+}
  ```
- - Add new dependency to your flutter project 
- ```shell 
- $ flutter pub add flutter_bloc
+ ``` dart
+ void main(){
+    final (lat,long) = geoLocation();
+    print('Current location: $lat, $long');
+ }
  ```
- 
- - This command gets all the dependencies listed in the pubspec. yaml file in the current working directory, as well as their transitive dependencies 
- ```shell 
- $ flutter pub get
- ```
+- Patterns are fully type safe, and checked during development.  
+- You can also pattern match on the type of values, for example from a hierarchy of classes. A `switch` can use patterns that match on the type, and the individual fields of each type, as in the body of `calculateArea` here:  
+``` dart
+sealed class Shape {
+}
 
-### 2.What is Dart?
+class Square implements Shape {
+  final double length;
+  Square(this.length);
+  
+}
 
-> A programming language optimized for building user interfaces with features such as sound null safety, the spread operator for expanding collections, and collection if for customizing UI for each platform
+class Circle implements Shape {
+  final double radius;
+  Circle(this.radius);
+}
 
-> A programming language that is easy to learn, with a familiar syntax
+double calculateArea(Shape shape) => switch (shape) {
+  Square(length: var l) => l * l,
+  Circle(radius: var r) => math.pi * r * r
+};
+```
+
+Overall, we’re adding a large selection of patterns that, when combined, make Dart much more expressive for structured data.
+In conjunction with patterns, we’re also adding capability controls to classes, via several new modifiers:
+
+- **interface class**: Cannot be extended.
+- **base class**: Disables the implicit interface, so cannot be implemented.
+- **final class**: Cannot extend, implement, or mix in the class (outside the current library).
+- **sealed class**: Same as abstract + final + the type is considered the root of a sealed type family for exhaustiveness checking. As an example, take the Shape class hierarchy above. In switch statements on the Shape type (like the calculateArea function), the analyzer will trigger errors if the switch statement does not handle all possible subtypes of the sealed type.
+- **mixin class**: A class which may be used as a mixin.
+Every new feature adds complexity to the language. To ensure Dart remains approachable, classes default to be fully permissive just like today, with the small exception that classes intended to be used as mixins must now use the mixin keyword.
